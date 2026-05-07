@@ -1,30 +1,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponBase.h"
 #include "GameFramework/Actor.h"
 #include "Shotgun.generated.h"
 
 UCLASS()
-class UNREAL_ADVANCED_TPS_API AShotgun : public AActor
+class UNREAL_ADVANCED_TPS_API AShotgun : public AWeaponBase
 {
 	GENERATED_BODY()
 	
 public:	
-	AShotgun();
-	
 	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY(EditAnywhere, Category = "Shot")
-	int32 BulletCount;
-
-	UPROPERTY(EditAnywhere, Category = "Shot")
-	float SpreadAngle;
 	
-	UPROPERTY(EditAnywhere, Category = "Rebound")
+	UPROPERTY(BlueprintReadWrite, Category = "Rebound")
 	float ReboundPitch;
 	
-	UPROPERTY(EditAnywhere, Category = "Rebound")
+	UPROPERTY(BlueprintReadWrite, Category = "Rebound")
 	float ReboundRecoveryTime;
+	
+	virtual void Fire() override;
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Reload();
 	
 protected:
 	float OriginalPitch;
@@ -32,5 +30,13 @@ protected:
 	bool bRecovering;
 	
 	virtual void BeginPlay() override;
-	void StartSingleTrace();
+	
+	UFUNCTION(BlueprintNativeEvent)
+	bool CheckAmmo();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void ProcessFiring();
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void UpdateAmmo();
 };

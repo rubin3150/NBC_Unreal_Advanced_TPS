@@ -1,18 +1,4 @@
 #include "Shotgun.h"
-#include "Kismet/KismetSystemLibrary.h"
-
-AShotgun::AShotgun()
-{
-	PrimaryActorTick.bCanEverTick = true;
-	
-	BulletCount = 8;
-	SpreadAngle = 5.f;
-	ReboundPitch = 20.f;
-	ReboundRecoveryTime = 1.f;
-	
-	Elapsed = 0.f;
-	bRecovering = false;
-}
 
 void AShotgun::BeginPlay()
 {
@@ -20,10 +6,10 @@ void AShotgun::BeginPlay()
 	
 	OriginalPitch = GetActorRotation().Pitch;
 	
-	// 마우스 왼쪽 버튼 바인딩
-	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-		if (UInputComponent* IC = PC->InputComponent)
-			IC->BindAction("Trace", IE_Pressed, this, &AShotgun::StartSingleTrace);
+	ReboundPitch = 20.f;
+	ReboundRecoveryTime = 1.f;
+	Elapsed = 0.f;
+	bRecovering = false;
 }
 
 void AShotgun::Tick(float DeltaTime)
@@ -43,37 +29,32 @@ void AShotgun::Tick(float DeltaTime)
 	if (Alpha >= 1.f) bRecovering = false;
 }
 
-void AShotgun::StartSingleTrace()
+void AShotgun::Fire()
 {
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
+	if (!CanFire) return;
 	
-	for (int32 i = 0; i < BulletCount; i++)
+	if (CheckAmmo())
 	{
-		FVector BaseDir = GetActorForwardVector();
-		FRotator Spread = FRotator(
-			FMath::RandRange(-SpreadAngle, SpreadAngle),
-			FMath::RandRange(-SpreadAngle, SpreadAngle),
-			0.f
-		);
-		
-		TArray<FHitResult> HitResults;
-		UKismetSystemLibrary::LineTraceMulti(
-			GetWorld(),
-			GetActorLocation(),
-			GetActorForwardVector() + Spread.RotateVector(BaseDir) * 1000.f + GetActorLocation(),
-			UEngineTypes::ConvertToTraceType(ECC_Visibility),
-			false,
-			ActorsToIgnore,
-			EDrawDebugTrace::ForDuration,
-			HitResults,
-			true,
-			FLinearColor::Red,
-			FLinearColor::Green,
-			1.f
-		);
+		ProcessFiring();
+		UpdateAmmo();
+		Super::Fire();
+		Elapsed = 0.f;
+		bRecovering = true;
+		return;
 	}
-	
-	Elapsed = 0.f;
-	bRecovering = true;
+}
+
+void AShotgun::Reload_Implementation()
+{
+	CurrentAmmo = MaxAmmo;
+}
+
+bool AShotgun::CheckAmmo_Implementation()
+{
+	return AmmoPerFire <= CurrentAmmo;
+}
+
+void AShotgun::UpdateAmmo_Implementation()
+{
+	CurrentAmmo -= AmmoPerFire;
 }
