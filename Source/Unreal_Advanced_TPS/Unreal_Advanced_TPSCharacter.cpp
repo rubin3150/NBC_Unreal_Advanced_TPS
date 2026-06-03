@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "FireDamageType.h"
 #include "InputActionValue.h"
+#include "MyActorComponent.h"
 #include "Engine/DamageEvents.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -56,29 +57,29 @@ AUnreal_Advanced_TPSCharacter::AUnreal_Advanced_TPSCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-float AUnreal_Advanced_TPSCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-	class AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	const UFireDamageType* FireDamage = DamageEvent.DamageTypeClass->GetDefaultObject<UFireDamageType>();
-	
-	if (FireDamage)
-	{
-		ActualDamage *= (1.f + FireDamage->ArmorPenetration);
-		
-		UE_LOG(LogTemp, Warning, TEXT("ByWorld Damage Received"));
-	}
-	
-	// if (EventInstigator)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("I'm Enemy"));
-	// }
-	
-	//HP -= ActualDamage;
-	
-	return ActualDamage;
-}
+// float AUnreal_Advanced_TPSCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+// 	class AController* EventInstigator, AActor* DamageCauser)
+// {
+// 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+// 	
+// 	const UFireDamageType* FireDamage = DamageEvent.DamageTypeClass->GetDefaultObject<UFireDamageType>();
+// 	
+// 	if (FireDamage)
+// 	{
+// 		ActualDamage *= (1.f + FireDamage->ArmorPenetration);
+// 		
+// 		UE_LOG(LogTemp, Warning, TEXT("ByWorld Damage Received"));
+// 	}
+// 	
+// 	// if (EventInstigator)
+// 	// {
+// 	// 	UE_LOG(LogTemp, Warning, TEXT("I'm Enemy"));
+// 	// }
+// 	
+// 	//HP -= ActualDamage;
+// 	
+// 	return ActualDamage;
+// }
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -94,6 +95,12 @@ void AUnreal_Advanced_TPSCharacter::NotifyControllerChanged()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+	}
+	
+	UMyActorComponent* HealthComp = FindComponentByClass<UMyActorComponent>();
+	if (HealthComp)
+	{
+		HealthComp->OnHealthDead.AddDynamic(this, &AUnreal_Advanced_TPSCharacter::OnDead);
 	}
 }
 
@@ -152,4 +159,22 @@ void AUnreal_Advanced_TPSCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AUnreal_Advanced_TPSCharacter::OnDead(AController* DeadInstigator)
+{
+	DisableInput(Cast<APlayerController>(GetController()));
+
+    GetCharacterMovement()->DisableMovement();
+    GetCharacterMovement()->StopMovementImmediately();
+
+    // 랙돌 활성화
+    GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    GetMesh()->SetSimulatePhysics(true);
+
+    // 캡슐은 콜리전만 끄고 유지
+    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    
+    // 메시를 루트에서 분리해서 랙돌이 자유롭게 움직이게 하기
+    GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }

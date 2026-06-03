@@ -46,7 +46,7 @@ class AUnreal_Advanced_TPSCharacter : public ACharacter
 
 public:
 	AUnreal_Advanced_TPSCharacter();
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	//virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 
@@ -55,9 +55,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-			
-
-protected:
 
 	virtual void NotifyControllerChanged() override;
 
@@ -68,5 +65,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+	UFUNCTION()
+	void OnDead(AController* DeadInstigator);
 };
 

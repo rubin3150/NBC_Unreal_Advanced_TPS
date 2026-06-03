@@ -9,5 +9,7 @@ public class Unreal_Advanced_TPS : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		
+		PublicIncludePaths.Add(ModuleDirectory);
 	}
 }
