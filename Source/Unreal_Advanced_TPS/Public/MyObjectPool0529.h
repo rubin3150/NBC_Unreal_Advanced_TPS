@@ -35,7 +35,7 @@ public:
 	
 	// 최종 회수
 	UFUNCTION(BlueprintCallable)
-	void RecyclePooledObject(class UPooledObject0529* PooledObject);
+	void RecyclePooledObject(class UPooledObject0529* PoolCompRef);
 	
 	// 집 나갔던 액터들 전부 회수
 	UFUNCTION(BlueprintCallable)

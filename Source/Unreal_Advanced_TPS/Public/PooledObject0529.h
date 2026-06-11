@@ -19,10 +19,9 @@ public:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	bool bIsPoolActive;
 	
-private:
-	TObjectPtr<class AMyObjectPool0529> ObjectPool;
-	
 	// 자멸버튼
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-		
+	
+private:
+	TObjectPtr<AMyObjectPool0529> ObjectPool;
 };
