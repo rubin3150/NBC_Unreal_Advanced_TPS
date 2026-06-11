@@ -10,18 +10,23 @@ class UNREAL_ADVANCED_TPS_API UPooledObject0529 : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	void Init(class AMyObjectPool0529* Owner);
-	
-	// 자멸버튼
+	void Init(class UObjectPoolWorldSubsystem* Owner, int32 InPoolIndex, int32 InSlotIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void RecycleSelf();
-	
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	bool bIsPoolActive;
-	
-	// 자멸버튼
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 PoolIndex = -1;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 SlotIndex = -1;
+
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-	
+
 private:
-	TObjectPtr<AMyObjectPool0529> ObjectPool;
+	UPROPERTY()
+	TObjectPtr<UObjectPoolWorldSubsystem> ObjectPool;
 };

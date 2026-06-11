@@ -1,10 +1,12 @@
 #include "PooledObject0529.h"
-#include "MyObjectPool0529.h"
+#include "ObjectPoolWorldSubsystem.h"
 
-void UPooledObject0529::Init(class AMyObjectPool0529* Owner)
+void UPooledObject0529::Init(UObjectPoolWorldSubsystem* Owner, int32 InPoolIndex, int32 InSlotIndex)
 {
 	bIsPoolActive = false;
 	ObjectPool = Owner;
+	PoolIndex = InPoolIndex;
+	SlotIndex = InSlotIndex;
 }
 
 void UPooledObject0529::RecycleSelf()
@@ -14,6 +16,10 @@ void UPooledObject0529::RecycleSelf()
 
 void UPooledObject0529::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	ObjectPool->OnPoolerCleanup.RemoveDynamic(this, &UPooledObject0529::RecycleSelf);
+	if (IsValid(ObjectPool))
+	{
+		ObjectPool->OnPoolerCleanup.RemoveDynamic(this, &UPooledObject0529::RecycleSelf);
+	}
+	
 	Super::OnComponentDestroyed(bDestroyingHierarchy);
 }
